@@ -24,7 +24,7 @@ interface UptimeHistory {
 
 const DDOS_RESPONSES = [
   "Not nice of you.",
-  "Bro really just clicked that. 💀",
+  "Bro really just clicked that. \u{1F480}",
   "The FBI has been notified. (just kidding) (or am I?)",
   "Congrats, you did nothing.",
   "ostider.se has been strengthened by your attempt.",
@@ -45,6 +45,14 @@ const SASSY_COMMENTS = [
   "ostider.se has better uptime than my sleep schedule",
 ];
 
+const CHAOS_LABELS = [
+  "chill",
+  "slightly unhinged",
+  "questionable",
+  "chaotic",
+  "MAXIMUM CHAOS",
+];
+
 function timeAgo(iso: string): string {
   const diff = (Date.now() - new Date(iso).getTime()) / 1000;
   if (diff < 60) return `${Math.floor(diff)}s ago`;
@@ -60,6 +68,7 @@ export default function Home() {
   const [ddosLoading, setDdosLoading] = useState(false);
   const [clickCount, setClickCount] = useState(0);
   const [sassyComment, setSassyComment] = useState("");
+  const [chaos, setChaos] = useState(0);
   const ddosTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const fetchData = () => {
@@ -100,9 +109,24 @@ export default function Home() {
     }, delay);
   };
 
+  // Chaos-driven styles
+  const chaosHue = chaos * 72; // 0 → 288 degrees
+  const chaosSkew = chaos * 1.5;
+  const chaosBorderRadius = chaos * 12;
+  const chaosScale = 1 + chaos * 0.03;
+  const chaosAnimSpeed = Math.max(0.2, 2 - chaos * 0.4);
+  const chaosInvert = chaos >= 4 ? 1 : 0;
+
+  const chaosStyle = {
+    filter: `hue-rotate(${chaosHue}deg) invert(${chaosInvert})`,
+    transform: `skew(${chaos > 2 ? chaosSkew : 0}deg) scale(${chaosScale})`,
+    borderRadius: `${chaosBorderRadius}px`,
+    "--chaos-speed": `${chaosAnimSpeed}s`,
+  } as React.CSSProperties;
+
   if (error) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-black text-white">
+      <div className="flex min-h-screen items-center justify-center bg-black text-white" style={chaosStyle}>
         <div className="text-center">
           <h1 className="text-6xl font-bold animate-shake">BRUH</h1>
           <p className="mt-4 text-2xl text-red-500">
@@ -132,11 +156,68 @@ export default function Home() {
   const pct = status.uptime_percentage_24h;
 
   return (
-    <div className={`min-h-screen ${isUp ? "bg-black" : "bg-red-950"} text-white transition-colors duration-500`}>
+    <div
+      className={`min-h-screen ${isUp ? "bg-black" : "bg-red-950"} text-white transition-all duration-500`}
+      style={chaosStyle}
+    >
+      {/* Fixed top-right: DDoS button */}
+      <div className="fixed top-4 right-4 z-50 flex flex-col items-end gap-2">
+        <button
+          onClick={handleDdos}
+          disabled={ddosLoading}
+          className={`rounded-lg px-4 py-2 text-xs font-bold uppercase tracking-wider transition-all shadow-lg ${
+            ddosLoading
+              ? "bg-red-900 text-red-400 cursor-wait animate-pulse"
+              : "bg-red-600 text-white hover:bg-red-500 hover:scale-105 active:scale-95"
+          }`}
+        >
+          {ddosLoading ? "\u2620\uFE0F ATTACKING..." : "\u{1F680} DDOS"}
+        </button>
+        {ddosMsg && (
+          <div className={`max-w-56 rounded-lg bg-zinc-900 border border-zinc-700 px-3 py-2 text-xs font-bold ${
+            clickCount > 5 ? "text-red-500 animate-shake" : "text-yellow-400"
+          }`}>
+            {ddosMsg}
+          </div>
+        )}
+        {clickCount > 3 && !ddosLoading && (
+          <p className="text-[10px] text-zinc-700">
+            attempts: {clickCount} | success: 0
+          </p>
+        )}
+      </div>
+
+      {/* Fixed bottom-right: Chaos slider */}
+      <div className="fixed bottom-4 right-4 z-50 rounded-xl border border-zinc-800 bg-zinc-900/90 backdrop-blur-sm p-4 shadow-lg">
+        <div className="text-[10px] text-zinc-500 uppercase tracking-widest mb-1">
+          Chaos Level
+        </div>
+        <input
+          type="range"
+          min={0}
+          max={4}
+          step={1}
+          value={chaos}
+          onChange={(e) => setChaos(Number(e.target.value))}
+          className="w-32 accent-red-500 cursor-pointer"
+        />
+        <div className={`text-xs font-bold mt-1 ${
+          chaos === 0 ? "text-zinc-500" :
+          chaos === 1 ? "text-yellow-400" :
+          chaos === 2 ? "text-orange-400" :
+          chaos === 3 ? "text-red-400" :
+          "text-red-500 animate-rainbow"
+        }`}>
+          {CHAOS_LABELS[chaos]}
+        </div>
+      </div>
+
       <div className="mx-auto max-w-3xl px-6 py-12">
         {/* Header */}
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-zinc-500 uppercase tracking-widest">
+          <h1 className={`font-bold text-zinc-500 uppercase tracking-widest ${
+            chaos >= 3 ? "text-4xl" : "text-2xl"
+          } transition-all duration-300`}>
             Is{" "}
             <a
               href="https://ostider.se"
@@ -153,10 +234,17 @@ export default function Home() {
           <div className="mt-8">
             {isUp ? (
               <>
-                <div className="text-8xl font-black text-green-400 animate-rainbow sm:text-9xl">
+                <div
+                  className={`font-black text-green-400 sm:text-9xl transition-all duration-300 ${
+                    chaos >= 2 ? "animate-rainbow" : ""
+                  } ${chaos >= 3 ? "animate-shake" : ""}`}
+                  style={{ fontSize: `${Math.max(6, 8 + chaos * 1.5)}rem` }}
+                >
                   NOPE
                 </div>
-                <p className="mt-4 text-2xl text-green-300">
+                <p className={`mt-4 text-green-300 transition-all duration-300 ${
+                  chaos >= 3 ? "text-4xl font-black" : "text-2xl"
+                }`}>
                   It&apos;s up. Chill.
                 </p>
                 <p className="mt-2 text-sm text-zinc-600 italic">
@@ -165,10 +253,15 @@ export default function Home() {
               </>
             ) : (
               <>
-                <div className="text-8xl font-black text-red-500 animate-shake sm:text-9xl">
+                <div
+                  className="font-black text-red-500 animate-shake sm:text-9xl"
+                  style={{ fontSize: `${Math.max(6, 8 + chaos * 1.5)}rem` }}
+                >
                   YES!!!
                 </div>
-                <p className="mt-4 text-2xl text-red-400">
+                <p className={`mt-4 text-red-400 transition-all duration-300 ${
+                  chaos >= 3 ? "text-4xl font-black animate-shake" : "text-2xl"
+                }`}>
                   IT&apos;S DOWN. PANIC.
                 </p>
                 <p className="mt-2 text-sm text-red-800 italic">
@@ -183,7 +276,9 @@ export default function Home() {
             href="https://ostider.se"
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-6 inline-block rounded-lg border border-zinc-700 bg-zinc-900 px-6 py-2 text-sm font-bold text-zinc-300 transition-all hover:bg-zinc-800 hover:text-white hover:scale-105"
+            className={`mt-6 inline-block border border-zinc-700 bg-zinc-900 px-6 py-2 text-sm font-bold text-zinc-300 transition-all hover:bg-zinc-800 hover:text-white hover:scale-105 ${
+              chaos >= 3 ? "rounded-full text-lg px-8 py-3" : "rounded-lg"
+            }`}
           >
             {isUp ? "Visit ostider.se (it's alive!)" : "Try visiting anyway (good luck)"}
           </a>
@@ -191,24 +286,32 @@ export default function Home() {
 
         {/* Stats Grid */}
         <div className="mt-16 grid grid-cols-3 gap-4">
-          <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-6 text-center">
+          <div className={`border border-zinc-800 bg-zinc-900 p-6 text-center transition-all duration-300 ${
+            chaos >= 2 ? "rounded-3xl" : "rounded-xl"
+          } ${chaos >= 4 ? "animate-shake" : ""}`}>
             <div className="text-sm text-zinc-500 uppercase tracking-wider">
               Uptime 24h
             </div>
-            <div className={`mt-2 text-4xl font-black ${
+            <div className={`mt-2 font-black transition-all duration-300 ${
+              chaos >= 3 ? "text-5xl" : "text-4xl"
+            } ${
               pct === null ? "text-zinc-600" :
               pct >= 99.9 ? "text-green-400" :
               pct >= 95 ? "text-yellow-400" :
               "text-red-500 animate-shake"
             }`}>
-              {pct !== null ? `${pct}%` : "—"}
+              {pct !== null ? `${pct}%` : "\u2014"}
             </div>
           </div>
-          <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-6 text-center">
+          <div className={`border border-zinc-800 bg-zinc-900 p-6 text-center transition-all duration-300 ${
+            chaos >= 2 ? "rounded-3xl" : "rounded-xl"
+          } ${chaos >= 4 ? "animate-shake" : ""}`}>
             <div className="text-sm text-zinc-500 uppercase tracking-wider">
               Response
             </div>
-            <div className={`mt-2 text-4xl font-black ${
+            <div className={`mt-2 font-black transition-all duration-300 ${
+              chaos >= 3 ? "text-5xl" : "text-4xl"
+            } ${
               status.response_time_ms === null ? "text-zinc-600" :
               status.response_time_ms < 500 ? "text-green-400" :
               status.response_time_ms < 2000 ? "text-yellow-400" :
@@ -216,15 +319,19 @@ export default function Home() {
             }`}>
               {status.response_time_ms !== null
                 ? `${Math.round(status.response_time_ms)}ms`
-                : "—"}
+                : "\u2014"}
             </div>
           </div>
-          <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-6 text-center">
+          <div className={`border border-zinc-800 bg-zinc-900 p-6 text-center transition-all duration-300 ${
+            chaos >= 2 ? "rounded-3xl" : "rounded-xl"
+          } ${chaos >= 4 ? "animate-shake" : ""}`}>
             <div className="text-sm text-zinc-500 uppercase tracking-wider">
               Last Check
             </div>
-            <div className="mt-2 text-4xl font-black text-zinc-300">
-              {status.last_checked ? timeAgo(status.last_checked) : "—"}
+            <div className={`mt-2 font-black text-zinc-300 transition-all duration-300 ${
+              chaos >= 3 ? "text-5xl" : "text-4xl"
+            }`}>
+              {status.last_checked ? timeAgo(status.last_checked) : "\u2014"}
             </div>
           </div>
         </div>
@@ -236,7 +343,9 @@ export default function Home() {
             <span className="font-bold text-zinc-300">Uptime Timeline</span>
             <span>now</span>
           </div>
-          <div className="mt-2 flex h-10 gap-[1px] overflow-hidden rounded-lg">
+          <div className={`mt-2 flex gap-[1px] overflow-hidden transition-all duration-300 ${
+            chaos >= 2 ? "rounded-full h-14" : "rounded-lg h-10"
+          }`}>
             {history.checks.length === 0 ? (
               <div className="flex-1 bg-zinc-800 flex items-center justify-center text-xs text-zinc-600">
                 waiting for data...
@@ -250,7 +359,7 @@ export default function Home() {
                       ? "bg-green-500 hover:bg-green-400"
                       : "bg-red-500 hover:bg-red-400 animate-pulse-bg"
                   }`}
-                  title={`${new Date(check.timestamp).toLocaleTimeString()} — ${
+                  title={`${new Date(check.timestamp).toLocaleTimeString()} \u2014 ${
                     check.is_up
                       ? `UP (${check.response_time_ms}ms)`
                       : "DOWN"
@@ -268,7 +377,9 @@ export default function Home() {
             {[...history.checks].reverse().slice(0, 20).map((check, i) => (
               <div
                 key={i}
-                className="flex items-center justify-between rounded-lg bg-zinc-900 px-4 py-2 text-sm"
+                className={`flex items-center justify-between bg-zinc-900 px-4 py-2 text-sm transition-all duration-300 ${
+                  chaos >= 2 ? "rounded-2xl" : "rounded-lg"
+                } ${chaos >= 4 && !check.is_up ? "animate-shake" : ""}`}
               >
                 <div className="flex items-center gap-3">
                   <span
@@ -297,36 +408,6 @@ export default function Home() {
               </div>
             ))}
           </div>
-        </div>
-
-        {/* DDoS Button */}
-        <div className="mt-16 text-center">
-          <p className="text-xs text-zinc-700 uppercase tracking-widest mb-4">
-            Totally real hacker tools
-          </p>
-          <button
-            onClick={handleDdos}
-            disabled={ddosLoading}
-            className={`rounded-lg px-8 py-3 text-sm font-bold uppercase tracking-wider transition-all ${
-              ddosLoading
-                ? "bg-red-900 text-red-400 cursor-wait animate-pulse"
-                : "bg-red-600 text-white hover:bg-red-500 hover:scale-105 active:scale-95"
-            }`}
-          >
-            {ddosLoading ? "☠️ ATTACKING..." : "🚀 LAUNCH DDOS ATTACK"}
-          </button>
-          {ddosMsg && (
-            <p className={`mt-4 text-lg font-bold ${
-              clickCount > 5 ? "text-red-500 animate-shake" : "text-yellow-400"
-            }`}>
-              {ddosMsg}
-            </p>
-          )}
-          {clickCount > 3 && !ddosLoading && (
-            <p className="mt-2 text-xs text-zinc-700">
-              attempts: {clickCount} | successful attacks: 0 | FBI alerts: maybe
-            </p>
-          )}
         </div>
 
         {/* Footer */}
