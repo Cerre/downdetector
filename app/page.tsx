@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 interface UptimeStatus {
   target: string;
@@ -22,6 +22,29 @@ interface UptimeHistory {
   checks: CheckEntry[];
 }
 
+const DDOS_RESPONSES = [
+  "Not nice of you.",
+  "Bro really just clicked that. 💀",
+  "The FBI has been notified. (just kidding) (or am I?)",
+  "Congrats, you did nothing.",
+  "ostider.se has been strengthened by your attempt.",
+  "Your IP has been logged. (it hasn't) (maybe)",
+  "That's illegal in 47 countries.",
+  "Attack launched! Just kidding. Touch grass.",
+  "Error 418: I'm a teapot, not a weapon.",
+  "Nice try, script kiddie.",
+  "You monster. ostider.se has feelings too.",
+  "Launching 0 packets... Done! 0% effective.",
+];
+
+const SASSY_COMMENTS = [
+  "ostider.se is built different fr fr",
+  "zero downtime? couldn't be my servers",
+  "ostider.se really said '99.9% uptime or die trying'",
+  "more stable than my mental health",
+  "ostider.se has better uptime than my sleep schedule",
+];
+
 function timeAgo(iso: string): string {
   const diff = (Date.now() - new Date(iso).getTime()) / 1000;
   if (diff < 60) return `${Math.floor(diff)}s ago`;
@@ -33,6 +56,11 @@ export default function Home() {
   const [status, setStatus] = useState<UptimeStatus | null>(null);
   const [history, setHistory] = useState<UptimeHistory | null>(null);
   const [error, setError] = useState(false);
+  const [ddosMsg, setDdosMsg] = useState<string | null>(null);
+  const [ddosLoading, setDdosLoading] = useState(false);
+  const [clickCount, setClickCount] = useState(0);
+  const [sassyComment, setSassyComment] = useState("");
+  const ddosTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const fetchData = () => {
     Promise.all([
@@ -50,8 +78,27 @@ export default function Home() {
   useEffect(() => {
     fetchData();
     const interval = setInterval(fetchData, 30000);
+    setSassyComment(SASSY_COMMENTS[Math.floor(Math.random() * SASSY_COMMENTS.length)]);
     return () => clearInterval(interval);
   }, []);
+
+  const handleDdos = () => {
+    setClickCount((c) => c + 1);
+    setDdosLoading(true);
+    setDdosMsg(null);
+
+    if (ddosTimeout.current) clearTimeout(ddosTimeout.current);
+
+    const delay = 1000 + Math.random() * 2000;
+    ddosTimeout.current = setTimeout(() => {
+      setDdosLoading(false);
+      if (clickCount >= 5) {
+        setDdosMsg("You've clicked this " + (clickCount + 1) + " times. Seek help.");
+      } else {
+        setDdosMsg(DDOS_RESPONSES[Math.floor(Math.random() * DDOS_RESPONSES.length)]);
+      }
+    }, delay);
+  };
 
   if (error) {
     return (
@@ -90,7 +137,16 @@ export default function Home() {
         {/* Header */}
         <div className="text-center">
           <h1 className="text-2xl font-bold text-zinc-500 uppercase tracking-widest">
-            Is ostider.se down?
+            Is{" "}
+            <a
+              href="https://ostider.se"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-zinc-300 underline decoration-zinc-600 underline-offset-4 hover:text-white hover:decoration-white transition-colors"
+            >
+              ostider.se
+            </a>
+            {" "}down?
           </h1>
 
           {/* The Big Answer */}
@@ -103,6 +159,9 @@ export default function Home() {
                 <p className="mt-4 text-2xl text-green-300">
                   It&apos;s up. Chill.
                 </p>
+                <p className="mt-2 text-sm text-zinc-600 italic">
+                  {sassyComment}
+                </p>
               </>
             ) : (
               <>
@@ -112,9 +171,22 @@ export default function Home() {
                 <p className="mt-4 text-2xl text-red-400">
                   IT&apos;S DOWN. PANIC.
                 </p>
+                <p className="mt-2 text-sm text-red-800 italic">
+                  someone call the developers. or don&apos;t. idk.
+                </p>
               </>
             )}
           </div>
+
+          {/* Visit button */}
+          <a
+            href="https://ostider.se"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-6 inline-block rounded-lg border border-zinc-700 bg-zinc-900 px-6 py-2 text-sm font-bold text-zinc-300 transition-all hover:bg-zinc-800 hover:text-white hover:scale-105"
+          >
+            {isUp ? "Visit ostider.se (it's alive!)" : "Try visiting anyway (good luck)"}
+          </a>
         </div>
 
         {/* Stats Grid */}
@@ -227,10 +299,49 @@ export default function Home() {
           </div>
         </div>
 
+        {/* DDoS Button */}
+        <div className="mt-16 text-center">
+          <p className="text-xs text-zinc-700 uppercase tracking-widest mb-4">
+            Totally real hacker tools
+          </p>
+          <button
+            onClick={handleDdos}
+            disabled={ddosLoading}
+            className={`rounded-lg px-8 py-3 text-sm font-bold uppercase tracking-wider transition-all ${
+              ddosLoading
+                ? "bg-red-900 text-red-400 cursor-wait animate-pulse"
+                : "bg-red-600 text-white hover:bg-red-500 hover:scale-105 active:scale-95"
+            }`}
+          >
+            {ddosLoading ? "☠️ ATTACKING..." : "🚀 LAUNCH DDOS ATTACK"}
+          </button>
+          {ddosMsg && (
+            <p className={`mt-4 text-lg font-bold ${
+              clickCount > 5 ? "text-red-500 animate-shake" : "text-yellow-400"
+            }`}>
+              {ddosMsg}
+            </p>
+          )}
+          {clickCount > 3 && !ddosLoading && (
+            <p className="mt-2 text-xs text-zinc-700">
+              attempts: {clickCount} | successful attacks: 0 | FBI alerts: maybe
+            </p>
+          )}
+        </div>
+
         {/* Footer */}
         <div className="mt-16 border-t border-zinc-800 pt-8 text-center text-sm text-zinc-600">
           <p>
-            Monitoring <span className="text-zinc-400 font-bold">ostider.se</span> every 60 seconds from a GCP VM
+            Monitoring{" "}
+            <a
+              href="https://ostider.se"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-zinc-400 font-bold hover:text-white transition-colors"
+            >
+              ostider.se
+            </a>
+            {" "}every 60 seconds from a GCP VM
           </p>
           <p className="mt-1">
             Powered by vibes, FastAPI, and questionable design choices
