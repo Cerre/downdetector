@@ -109,20 +109,15 @@ export default function Home() {
     }, delay);
   };
 
-  // Chaos-driven styles
-  const chaosHue = chaos * 72; // 0 → 288 degrees
-  const chaosSkew = chaos * 1.5;
-  const chaosBorderRadius = chaos * 12;
-  const chaosScale = 1 + chaos * 0.03;
-  const chaosAnimSpeed = Math.max(0.2, 2 - chaos * 0.4);
-  const chaosInvert = chaos >= 4 ? 1 : 0;
-
+  // Chaos-driven styles on the page wrapper
+  const chaosHue = chaos * 72;
   const chaosStyle = {
-    filter: `hue-rotate(${chaosHue}deg) invert(${chaosInvert})`,
-    transform: `skew(${chaos > 2 ? chaosSkew : 0}deg) scale(${chaosScale})`,
-    borderRadius: `${chaosBorderRadius}px`,
-    "--chaos-speed": `${chaosAnimSpeed}s`,
+    filter: `hue-rotate(${chaosHue}deg)${chaos >= 4 ? " invert(1)" : ""}`,
+    transform: `skew(${chaos >= 3 ? chaos * 1.5 : 0}deg) scale(${1 + chaos * 0.02})`,
   } as React.CSSProperties;
+
+  // Card float classes per index
+  const cardFloat = ["animate-float-1", "animate-float-2", "animate-float-3"];
 
   if (error) {
     return (
@@ -157,7 +152,11 @@ export default function Home() {
 
   return (
     <div
-      className={`min-h-screen ${isUp ? "bg-black" : "bg-red-950"} text-white transition-all duration-500`}
+      className={`min-h-screen text-white transition-all duration-500 ${
+        chaos >= 3 ? "animate-rainbow-bg" :
+        chaos >= 2 ? "animate-bg-cycle" :
+        isUp ? "bg-black" : "bg-red-950"
+      }`}
       style={chaosStyle}
     >
       {/* Fixed bottom-right: Chaos stepper */}
@@ -195,9 +194,9 @@ export default function Home() {
       <div className="mx-auto max-w-3xl px-6 py-12">
         {/* Header */}
         <div className="text-center">
-          <h1 className={`font-bold text-zinc-500 uppercase tracking-widest ${
+          <h1 className={`font-bold text-zinc-500 uppercase tracking-widest transition-all duration-300 ${
             chaos >= 3 ? "text-4xl" : "text-2xl"
-          } transition-all duration-300`}>
+          } ${chaos >= 2 ? "animate-drift" : ""}`}>
             Is{" "}
             <a
               href="https://ostider.se"
@@ -216,9 +215,10 @@ export default function Home() {
               <>
                 <div
                   className={`font-black text-green-400 sm:text-9xl transition-all duration-300 ${
-                    chaos >= 2 ? "animate-rainbow" : ""
-                  } ${chaos >= 3 ? "animate-shake" : ""}`}
-                  style={{ fontSize: `${Math.max(6, 8 + chaos * 1.5)}rem` }}
+                    chaos >= 1 ? "animate-rainbow" : ""
+                  } ${chaos >= 3 ? "animate-jitter" : ""
+                  } ${chaos >= 4 ? "animate-spin-slow" : ""}`}
+                  style={{ fontSize: `${Math.max(6, 8 + chaos * 2)}rem` }}
                 >
                   NOPE
                 </div>
@@ -234,8 +234,10 @@ export default function Home() {
             ) : (
               <>
                 <div
-                  className="font-black text-red-500 animate-shake sm:text-9xl"
-                  style={{ fontSize: `${Math.max(6, 8 + chaos * 1.5)}rem` }}
+                  className={`font-black text-red-500 animate-shake sm:text-9xl ${
+                    chaos >= 4 ? "animate-spin-slow" : ""
+                  }`}
+                  style={{ fontSize: `${Math.max(6, 8 + chaos * 2)}rem` }}
                 >
                   YES!!!
                 </div>
@@ -266,66 +268,64 @@ export default function Home() {
 
         {/* Stats Grid */}
         <div className="mt-16 grid grid-cols-3 gap-4">
-          <div className={`border border-zinc-800 bg-zinc-900 p-6 text-center transition-all duration-300 ${
-            chaos >= 2 ? "rounded-3xl" : "rounded-xl"
-          } ${chaos >= 4 ? "animate-shake" : ""}`}>
-            <div className="text-sm text-zinc-500 uppercase tracking-wider">
-              Uptime 24h
+          {[
+            {
+              label: "Uptime 24h",
+              value: pct !== null ? `${pct}%` : "\u2014",
+              color: pct === null ? "text-zinc-600" :
+                pct >= 99.9 ? "text-green-400" :
+                pct >= 95 ? "text-yellow-400" :
+                "text-red-500 animate-shake",
+            },
+            {
+              label: "Response",
+              value: status.response_time_ms !== null
+                ? `${Math.round(status.response_time_ms)}ms` : "\u2014",
+              color: status.response_time_ms === null ? "text-zinc-600" :
+                status.response_time_ms < 500 ? "text-green-400" :
+                status.response_time_ms < 2000 ? "text-yellow-400" :
+                "text-red-500",
+            },
+            {
+              label: "Last Check",
+              value: status.last_checked ? timeAgo(status.last_checked) : "\u2014",
+              color: "text-zinc-300",
+            },
+          ].map((stat, i) => (
+            <div
+              key={stat.label}
+              className={`border border-zinc-800 bg-zinc-900 p-6 text-center transition-all duration-300 ${
+                chaos >= 2 ? "rounded-3xl" : "rounded-xl"
+              } ${chaos >= 1 ? cardFloat[i] : ""
+              } ${chaos >= 3 ? "animate-jitter" : ""
+              } ${chaos >= 4 ? "animate-spin-slow" : ""}`}
+            >
+              <div className={`text-sm text-zinc-500 uppercase tracking-wider ${
+                chaos >= 2 ? "animate-rainbow" : ""
+              }`}>
+                {stat.label}
+              </div>
+              <div className={`mt-2 font-black transition-all duration-300 ${
+                chaos >= 3 ? "text-5xl" : "text-4xl"
+              } ${stat.color}`}>
+                {stat.value}
+              </div>
             </div>
-            <div className={`mt-2 font-black transition-all duration-300 ${
-              chaos >= 3 ? "text-5xl" : "text-4xl"
-            } ${
-              pct === null ? "text-zinc-600" :
-              pct >= 99.9 ? "text-green-400" :
-              pct >= 95 ? "text-yellow-400" :
-              "text-red-500 animate-shake"
-            }`}>
-              {pct !== null ? `${pct}%` : "\u2014"}
-            </div>
-          </div>
-          <div className={`border border-zinc-800 bg-zinc-900 p-6 text-center transition-all duration-300 ${
-            chaos >= 2 ? "rounded-3xl" : "rounded-xl"
-          } ${chaos >= 4 ? "animate-shake" : ""}`}>
-            <div className="text-sm text-zinc-500 uppercase tracking-wider">
-              Response
-            </div>
-            <div className={`mt-2 font-black transition-all duration-300 ${
-              chaos >= 3 ? "text-5xl" : "text-4xl"
-            } ${
-              status.response_time_ms === null ? "text-zinc-600" :
-              status.response_time_ms < 500 ? "text-green-400" :
-              status.response_time_ms < 2000 ? "text-yellow-400" :
-              "text-red-500"
-            }`}>
-              {status.response_time_ms !== null
-                ? `${Math.round(status.response_time_ms)}ms`
-                : "\u2014"}
-            </div>
-          </div>
-          <div className={`border border-zinc-800 bg-zinc-900 p-6 text-center transition-all duration-300 ${
-            chaos >= 2 ? "rounded-3xl" : "rounded-xl"
-          } ${chaos >= 4 ? "animate-shake" : ""}`}>
-            <div className="text-sm text-zinc-500 uppercase tracking-wider">
-              Last Check
-            </div>
-            <div className={`mt-2 font-black text-zinc-300 transition-all duration-300 ${
-              chaos >= 3 ? "text-5xl" : "text-4xl"
-            }`}>
-              {status.last_checked ? timeAgo(status.last_checked) : "\u2014"}
-            </div>
-          </div>
+          ))}
         </div>
 
         {/* Timeline Bar */}
-        <div className="mt-12">
+        <div className={`mt-12 ${chaos >= 2 ? "animate-drift" : ""}`}>
           <div className="flex items-center justify-between text-sm text-zinc-500">
-            <span>24h ago</span>
-            <span className="font-bold text-zinc-300">Uptime Timeline</span>
-            <span>now</span>
+            <span>{chaos >= 3 ? "the past???" : "24h ago"}</span>
+            <span className={`font-bold text-zinc-300 ${chaos >= 3 ? "animate-rainbow" : ""}`}>
+              {chaos >= 4 ? "CHAOS TIMELINE" : "Uptime Timeline"}
+            </span>
+            <span>{chaos >= 3 ? "now-ish" : "now"}</span>
           </div>
           <div className={`mt-2 flex gap-[1px] overflow-hidden transition-all duration-300 ${
-            chaos >= 2 ? "rounded-full h-14" : "rounded-lg h-10"
-          }`}>
+            chaos >= 2 ? "rounded-full" : "rounded-lg"
+          } ${chaos >= 3 ? "h-20" : chaos >= 2 ? "h-14" : "h-10"}`}>
             {history.checks.length === 0 ? (
               <div className="flex-1 bg-zinc-800 flex items-center justify-center text-xs text-zinc-600">
                 waiting for data...
@@ -352,14 +352,17 @@ export default function Home() {
 
         {/* Recent Checks Table */}
         <div className="mt-12">
-          <h2 className="text-lg font-bold text-zinc-300">Recent Checks</h2>
+          <h2 className={`text-lg font-bold text-zinc-300 ${chaos >= 3 ? "animate-drift" : ""}`}>
+            {chaos >= 4 ? "RECENT CHAOS" : "Recent Checks"}
+          </h2>
           <div className="mt-4 space-y-1">
             {[...history.checks].reverse().slice(0, 5).map((check, i) => (
               <div
                 key={i}
                 className={`flex items-center justify-between bg-zinc-900 px-4 py-2 text-sm transition-all duration-300 ${
                   chaos >= 2 ? "rounded-2xl" : "rounded-lg"
-                } ${chaos >= 4 && !check.is_up ? "animate-shake" : ""}`}
+                } ${chaos >= 3 ? cardFloat[i % 3] : ""
+                } ${chaos >= 4 ? "animate-jitter" : ""}`}
               >
                 <div className="flex items-center gap-3">
                   <span
@@ -391,9 +394,11 @@ export default function Home() {
         </div>
 
         {/* DDoS Button */}
-        <div className="mt-16 text-center">
-          <p className="text-xs text-zinc-700 uppercase tracking-widest mb-4">
-            Totally real hacker tools
+        <div className={`mt-16 text-center ${chaos >= 2 ? "animate-float-2" : ""}`}>
+          <p className={`text-xs text-zinc-700 uppercase tracking-widest mb-4 ${
+            chaos >= 3 ? "animate-rainbow text-base" : ""
+          }`}>
+            {chaos >= 4 ? "WEAPONS OF MASS DESTRUCTION" : "Totally real hacker tools"}
           </p>
           <button
             onClick={handleDdos}
@@ -421,7 +426,9 @@ export default function Home() {
         </div>
 
         {/* Footer */}
-        <div className="mt-16 border-t border-zinc-800 pt-8 text-center text-sm text-zinc-600">
+        <div className={`mt-16 border-t border-zinc-800 pt-8 text-center text-sm text-zinc-600 ${
+          chaos >= 4 ? "animate-spin-slow" : chaos >= 2 ? "animate-drift" : ""
+        }`}>
           <p>
             Monitoring{" "}
             <a
@@ -435,7 +442,11 @@ export default function Home() {
             {" "}every 60 seconds from a GCP VM
           </p>
           <p className="mt-1">
-            Powered by vibes, FastAPI, and questionable design choices
+            {chaos >= 4
+              ? "Powered by pure unfiltered chaos"
+              : chaos >= 3
+              ? "Powered by vibes and regret"
+              : "Powered by vibes, FastAPI, and questionable design choices"}
           </p>
         </div>
       </div>
