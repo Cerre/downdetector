@@ -160,56 +160,36 @@ export default function Home() {
       className={`min-h-screen ${isUp ? "bg-black" : "bg-red-950"} text-white transition-all duration-500`}
       style={chaosStyle}
     >
-      {/* Fixed top-right: DDoS button */}
-      <div className="fixed top-4 right-4 z-50 flex flex-col items-end gap-2">
+      {/* Fixed bottom-right: Chaos stepper */}
+      <div className="fixed bottom-4 right-4 z-50 rounded-xl border border-zinc-800 bg-zinc-900/90 backdrop-blur-sm p-3 shadow-lg flex items-center gap-3">
         <button
-          onClick={handleDdos}
-          disabled={ddosLoading}
-          className={`rounded-lg px-4 py-2 text-xs font-bold uppercase tracking-wider transition-all shadow-lg ${
-            ddosLoading
-              ? "bg-red-900 text-red-400 cursor-wait animate-pulse"
-              : "bg-red-600 text-white hover:bg-red-500 hover:scale-105 active:scale-95"
-          }`}
+          onClick={() => setChaos((c) => Math.max(0, c - 1))}
+          disabled={chaos === 0}
+          className="w-7 h-7 rounded-lg bg-zinc-800 text-zinc-400 font-bold text-sm hover:bg-zinc-700 hover:text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
         >
-          {ddosLoading ? "\u2620\uFE0F ATTACKING..." : "\u{1F680} DDOS"}
+          -
         </button>
-        {ddosMsg && (
-          <div className={`max-w-56 rounded-lg bg-zinc-900 border border-zinc-700 px-3 py-2 text-xs font-bold ${
-            clickCount > 5 ? "text-red-500 animate-shake" : "text-yellow-400"
-          }`}>
-            {ddosMsg}
+        <div className="text-center min-w-24">
+          <div className="text-[10px] text-zinc-500 uppercase tracking-widest">
+            Chaos
           </div>
-        )}
-        {clickCount > 3 && !ddosLoading && (
-          <p className="text-[10px] text-zinc-700">
-            attempts: {clickCount} | success: 0
-          </p>
-        )}
-      </div>
-
-      {/* Fixed bottom-right: Chaos slider */}
-      <div className="fixed bottom-4 right-4 z-50 rounded-xl border border-zinc-800 bg-zinc-900/90 backdrop-blur-sm p-4 shadow-lg">
-        <div className="text-[10px] text-zinc-500 uppercase tracking-widest mb-1">
-          Chaos Level
+          <div className={`text-xs font-bold ${
+            chaos === 0 ? "text-zinc-500" :
+            chaos === 1 ? "text-yellow-400" :
+            chaos === 2 ? "text-orange-400" :
+            chaos === 3 ? "text-red-400" :
+            "text-red-500 animate-rainbow"
+          }`}>
+            {CHAOS_LABELS[chaos]}
+          </div>
         </div>
-        <input
-          type="range"
-          min={0}
-          max={4}
-          step={1}
-          value={chaos}
-          onChange={(e) => setChaos(Number(e.target.value))}
-          className="w-32 accent-red-500 cursor-pointer"
-        />
-        <div className={`text-xs font-bold mt-1 ${
-          chaos === 0 ? "text-zinc-500" :
-          chaos === 1 ? "text-yellow-400" :
-          chaos === 2 ? "text-orange-400" :
-          chaos === 3 ? "text-red-400" :
-          "text-red-500 animate-rainbow"
-        }`}>
-          {CHAOS_LABELS[chaos]}
-        </div>
+        <button
+          onClick={() => setChaos((c) => Math.min(4, c + 1))}
+          disabled={chaos === 4}
+          className="w-7 h-7 rounded-lg bg-zinc-800 text-zinc-400 font-bold text-sm hover:bg-zinc-700 hover:text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+        >
+          +
+        </button>
       </div>
 
       <div className="mx-auto max-w-3xl px-6 py-12">
@@ -374,7 +354,7 @@ export default function Home() {
         <div className="mt-12">
           <h2 className="text-lg font-bold text-zinc-300">Recent Checks</h2>
           <div className="mt-4 space-y-1">
-            {[...history.checks].reverse().slice(0, 20).map((check, i) => (
+            {[...history.checks].reverse().slice(0, 5).map((check, i) => (
               <div
                 key={i}
                 className={`flex items-center justify-between bg-zinc-900 px-4 py-2 text-sm transition-all duration-300 ${
@@ -408,6 +388,36 @@ export default function Home() {
               </div>
             ))}
           </div>
+        </div>
+
+        {/* DDoS Button */}
+        <div className="mt-16 text-center">
+          <p className="text-xs text-zinc-700 uppercase tracking-widest mb-4">
+            Totally real hacker tools
+          </p>
+          <button
+            onClick={handleDdos}
+            disabled={ddosLoading}
+            className={`rounded-lg px-8 py-3 text-sm font-bold uppercase tracking-wider transition-all ${
+              ddosLoading
+                ? "bg-red-900 text-red-400 cursor-wait animate-pulse"
+                : "bg-red-600 text-white hover:bg-red-500 hover:scale-105 active:scale-95"
+            }`}
+          >
+            {ddosLoading ? "\u2620\uFE0F ATTACKING..." : "\u{1F680} LAUNCH DDOS ATTACK"}
+          </button>
+          {ddosMsg && (
+            <p className={`mt-4 text-lg font-bold ${
+              clickCount > 5 ? "text-red-500 animate-shake" : "text-yellow-400"
+            }`}>
+              {ddosMsg}
+            </p>
+          )}
+          {clickCount > 3 && !ddosLoading && (
+            <p className="mt-2 text-xs text-zinc-700">
+              attempts: {clickCount} | successful attacks: 0 | FBI alerts: maybe
+            </p>
+          )}
         </div>
 
         {/* Footer */}
