@@ -79,6 +79,7 @@ export default function Home() {
     () => SASSY_COMMENTS[Math.floor(Math.random() * SASSY_COMMENTS.length)],
   );
   const [chaos, setChaos] = useState(0);
+  const [chaosTick, setChaosTick] = useState(0);
   const ddosTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const fetchData = () => {
@@ -99,6 +100,16 @@ export default function Home() {
     const interval = setInterval(fetchData, 30000);
     return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+    if (chaos < 3) return;
+
+    const interval = setInterval(() => {
+      setChaosTick((t) => t + 1);
+    }, chaos >= 4 ? 700 : 1000);
+
+    return () => clearInterval(interval);
+  }, [chaos]);
 
   const handleDdos = () => {
     if (ddosLoading || ddosClicks >= DDOS_SUCCESS_CLICKS) return;
@@ -161,6 +172,30 @@ export default function Home() {
   const hasTakenDown = ddosClicks >= DDOS_SUCCESS_CLICKS;
   const isUp = status.is_up && !hasTakenDown;
   const pct = status.uptime_percentage_24h;
+  const recentChecksBase = [...history.checks].reverse().slice(0, 5);
+  const recentChecks = chaos >= 3 && recentChecksBase.length > 0
+    ? recentChecksBase.map((_, i) => recentChecksBase[(i + chaosTick) % recentChecksBase.length])
+    : recentChecksBase;
+
+  const displayTime = (timestamp: string, idx: number) => {
+    if (chaos < 4) return new Date(timestamp).toLocaleTimeString();
+    if ((chaosTick + idx) % 3 === 0) return "??:??:??";
+    return new Date(timestamp).toLocaleTimeString();
+  };
+
+  const displayStatusCode = (statusCode: number | null, idx: number) => {
+    if (!statusCode) return null;
+    if (chaos < 4) return String(statusCode);
+    if ((chaosTick + idx) % 4 === 0) return "ERR";
+    return String(statusCode);
+  };
+
+  const displayResponse = (responseTimeMs: number | null, idx: number) => {
+    if (!responseTimeMs) return "timeout";
+    if (chaos < 4) return `${Math.round(responseTimeMs)}ms`;
+    if ((chaosTick + idx) % 5 === 0) return "NaNms";
+    return `${Math.round(responseTimeMs)}ms`;
+  };
 
   return (
     <div
@@ -338,40 +373,47 @@ export default function Home() {
 
         {/* Recent Checks Table */}
         <div className="mt-8 sm:mt-12">
-          <h2 className={`text-lg font-bold text-zinc-300 ${chaos >= 3 ? "animate-drift" : ""}`}>
+          <h2 className={`text-lg font-bold text-zinc-300 ${chaos >= 3 ? "animate-drift" : ""} ${chaos >= 4 ? "animate-rainbow" : ""}`}>
             {chaos >= 4 ? "RECENT CHAOS" : "Recent Checks"}
           </h2>
-          <div className="mt-4 space-y-1">
-            {[...history.checks].reverse().slice(0, 5).map((check, i) => (
+          <div className={`mt-4 space-y-1 ${chaos >= 2 ? "animate-float-1" : ""}`}>
+            {recentChecks.map((check, i) => (
               <div
                 key={i}
                 className={`${i > 2 ? "hidden sm:flex" : "flex"} items-center justify-between bg-zinc-900 px-4 py-2 text-sm transition-all duration-300 ${
                   chaos >= 2 ? "rounded-2xl" : "rounded-lg"
                 } ${chaos >= 3 ? cardFloat[i % 3] : ""
-                } ${chaos >= 4 ? "animate-jitter" : ""}`}
+                } ${chaos >= 4 ? "animate-jitter" : ""
+                } ${chaos >= 2 ? "border border-zinc-800/80" : ""}`}
               >
                 <div className="flex items-center gap-3">
                   <span
                     className={`inline-block h-2.5 w-2.5 rounded-full ${
                       check.is_up ? "bg-green-500" : "bg-red-500 animate-pulse-bg"
-                    }`}
+                    } ${chaos >= 3 ? "animate-jitter" : ""}`}
                   />
-                  <span className="text-zinc-400">
-                    {new Date(check.timestamp).toLocaleTimeString()}
+                  <span className={`text-zinc-400 ${chaos >= 4 && (chaosTick + i) % 3 === 0 ? "animate-rainbow" : ""}`}>
+                    {displayTime(check.timestamp, i)}
                   </span>
+                  {chaos >= 3 && (
+                    <span className={`text-[10px] uppercase tracking-widest ${
+                      chaos >= 4 ? "text-red-400 animate-shake" : "text-orange-400"
+                    }`}
+                    >
+                      {chaos >= 4 ? "UNSTABLE" : "warning"}
+                    </span>
+                  )}
                 </div>
                 <div className="flex items-center gap-4">
                   {check.status_code && (
                     <span className={`font-mono ${
                       check.status_code < 400 ? "text-green-400" : "text-red-400"
                     }`}>
-                      {check.status_code}
+                      {displayStatusCode(check.status_code, i)}
                     </span>
                   )}
-                  <span className="w-20 text-right font-mono text-zinc-500">
-                    {check.response_time_ms
-                      ? `${Math.round(check.response_time_ms)}ms`
-                      : "timeout"}
+                  <span className={`w-20 text-right font-mono ${chaos >= 3 ? "text-zinc-300" : "text-zinc-500"}`}>
+                    {displayResponse(check.response_time_ms, i)}
                   </span>
                 </div>
               </div>
