@@ -51,6 +51,7 @@ const BUTTON_LABELS = [
 ];
 
 const DDOS_SUCCESS_CLICKS = 5;
+const RICKROLL_URL = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
 
 const SASSY_COMMENTS = [
   "ostider.se is built different fr fr",
@@ -177,14 +178,18 @@ export default function Home() {
             chaos >= 3 ? "text-4xl" : "text-2xl"
           } ${chaos >= 2 ? "animate-drift" : ""}`}>
             Is{" "}
-            <a
-              href="https://ostider.se"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-zinc-300 underline decoration-zinc-600 underline-offset-4 hover:text-white hover:decoration-white transition-colors"
-            >
-              ostider.se
-            </a>
+            {hasTakenDown ? (
+              <span className="text-zinc-300">ostider.se</span>
+            ) : (
+              <a
+                href="https://ostider.se"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-zinc-300 underline decoration-zinc-600 underline-offset-4 hover:text-white hover:decoration-white transition-colors"
+              >
+                ostider.se
+              </a>
+            )}
             {" "}down?
           </h1>
 
@@ -224,19 +229,19 @@ export default function Home() {
                   chaos >= 3 ? "text-4xl font-black animate-shake" : "text-2xl"
                 }`}>
                   {hasTakenDown ? (
-                    <>
-                      You succesfully took down{" "}
-                      <a
-                        href="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="underline decoration-red-500 underline-offset-4 hover:text-red-200"
-                      >
-                        ostider.se
-                      </a>
-                    </>
+                    <>You succesfully took down ostider.se</>
                   ) : "IT&apos;S DOWN. PANIC."}
                 </p>
+                {hasTakenDown && (
+                  <a
+                    href={RICKROLL_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-6 inline-block rounded-full border border-red-500 bg-red-950 px-8 py-3 text-base font-black uppercase tracking-wide text-red-200 underline decoration-red-400 underline-offset-4 transition-all hover:scale-105 hover:bg-red-900 hover:text-white"
+                  >
+                    ostider.se
+                  </a>
+                )}
                 <p className="mt-2 text-sm text-red-800 italic">
                   someone call the developers. or don&apos;t. idk.
                 </p>
@@ -245,16 +250,18 @@ export default function Home() {
           </div>
 
           {/* Visit button */}
-          <a
-            href="https://ostider.se"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={`mt-6 inline-block border border-zinc-700 bg-zinc-900 px-6 py-2 text-sm font-bold text-zinc-300 transition-all hover:bg-zinc-800 hover:text-white hover:scale-105 ${
-              chaos >= 3 ? "rounded-full text-lg px-8 py-3" : "rounded-lg"
-            }`}
-          >
-            {isUp ? "Visit ostider.se (it's alive!)" : "Try visiting anyway (good luck)"}
-          </a>
+          {!hasTakenDown && (
+            <a
+              href="https://ostider.se"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`mt-6 inline-block border border-zinc-700 bg-zinc-900 px-6 py-2 text-sm font-bold text-zinc-300 transition-all hover:bg-zinc-800 hover:text-white hover:scale-105 ${
+                chaos >= 3 ? "rounded-full text-lg px-8 py-3" : "rounded-lg"
+              }`}
+            >
+              {isUp ? "Visit ostider.se (it's alive!)" : "Try visiting anyway (good luck)"}
+            </a>
+          )}
         </div>
 
         {/* Stats Grid */}
@@ -433,14 +440,18 @@ export default function Home() {
         }`}>
           <p>
             Monitoring{" "}
-            <a
-              href="https://ostider.se"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-zinc-400 font-bold hover:text-white transition-colors"
-            >
-              ostider.se
-            </a>
+            {hasTakenDown ? (
+              <span className="text-zinc-400 font-bold">ostider.se</span>
+            ) : (
+              <a
+                href="https://ostider.se"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-zinc-400 font-bold hover:text-white transition-colors"
+              >
+                ostider.se
+              </a>
+            )}
             {" "}every 60 seconds from a GCP VM
           </p>
           <p className="mt-1">
