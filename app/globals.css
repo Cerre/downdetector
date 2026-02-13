@@ -87,6 +87,11 @@ body {
   100% { background-color: #330000; }
 }
 
+@keyframes cta-breathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
 .animate-rainbow {
   animation: rainbow 2s linear infinite;
 }
@@ -129,4 +134,8 @@ body {
 
 .animate-rainbow-bg {
   animation: rainbow-bg 4s linear infinite;
+}
+
+.animate-cta-breathe {
+  animation: cta-breathe 1.2s ease-in-out infinite;
 }

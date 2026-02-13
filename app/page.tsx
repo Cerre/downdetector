@@ -275,7 +275,7 @@ export default function Home() {
                     href={RICKROLL_URL}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="mt-5 inline-block rounded-full border border-red-500 bg-red-900/70 px-7 py-2.5 text-sm font-black uppercase tracking-wide text-red-100 underline decoration-red-300 underline-offset-4 transition-all hover:scale-105 hover:bg-red-800 hover:text-white"
+                    className="animate-cta-breathe mt-5 inline-block rounded-full border border-red-500 bg-red-900/70 px-7 py-2.5 text-sm font-black uppercase tracking-wide text-red-100 underline decoration-red-300 underline-offset-4 transition-all hover:bg-red-800 hover:text-white"
                   >
                     ostider.se
                   </a>
