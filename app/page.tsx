@@ -171,7 +171,7 @@ export default function Home() {
       }`}
       style={chaosStyle}
     >
-      <div className="mx-auto max-w-3xl px-6 py-12">
+      <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6 sm:py-12">
         {/* Header */}
         <div className="text-center">
           <h1 className={`font-bold text-zinc-500 uppercase tracking-widest transition-all duration-300 ${
@@ -194,7 +194,7 @@ export default function Home() {
           </h1>
 
           {/* The Big Answer */}
-          <div className="mt-8">
+          <div className="mt-6 sm:mt-8">
             {isUp ? (
               <>
                 <div
@@ -265,7 +265,7 @@ export default function Home() {
         </div>
 
         {/* Stats Grid */}
-        <div className="mt-16 grid grid-cols-3 gap-4">
+        <div className="mt-10 grid grid-cols-3 gap-2 sm:mt-16 sm:gap-4">
           {[
             {
               label: "Uptime 24h",
@@ -292,19 +292,19 @@ export default function Home() {
           ].map((stat, i) => (
             <div
               key={stat.label}
-              className={`border border-zinc-800 bg-zinc-900 p-6 text-center transition-all duration-300 ${
+              className={`border border-zinc-800 bg-zinc-900 p-4 sm:p-6 text-center transition-all duration-300 ${
                 chaos >= 2 ? "rounded-3xl" : "rounded-xl"
               } ${chaos >= 1 ? cardFloat[i] : ""
               } ${chaos >= 3 ? "animate-jitter" : ""
               } ${chaos >= 4 ? "animate-spin-slow" : ""}`}
             >
-              <div className={`text-sm text-zinc-500 uppercase tracking-wider ${
+              <div className={`text-[10px] sm:text-sm text-zinc-500 uppercase tracking-wide sm:tracking-wider ${
                 chaos >= 2 ? "animate-rainbow" : ""
               }`}>
                 {stat.label}
               </div>
-              <div className={`mt-2 font-black transition-all duration-300 ${
-                chaos >= 3 ? "text-5xl" : "text-4xl"
+              <div className={`mt-2 font-black leading-none transition-all duration-300 ${
+                chaos >= 3 ? "text-3xl sm:text-5xl" : "text-2xl sm:text-4xl"
               } ${stat.color}`}>
                 {stat.value}
               </div>
@@ -313,7 +313,7 @@ export default function Home() {
         </div>
 
         {/* Timeline Bar */}
-        <div className={`mt-12 ${chaos >= 2 ? "animate-drift" : ""}`}>
+        <div className={`mt-8 sm:mt-12 ${chaos >= 2 ? "animate-drift" : ""}`}>
           <div className="flex items-center justify-between text-sm text-zinc-500">
             <span>{chaos >= 3 ? "the past???" : "24h ago"}</span>
             <span className={`font-bold text-zinc-300 ${chaos >= 3 ? "animate-rainbow" : ""}`}>
@@ -323,7 +323,7 @@ export default function Home() {
           </div>
           <div className={`mt-2 flex gap-[1px] overflow-hidden transition-all duration-300 ${
             chaos >= 2 ? "rounded-full" : "rounded-lg"
-          } ${chaos >= 3 ? "h-20" : chaos >= 2 ? "h-14" : "h-10"}`}>
+          } ${chaos >= 3 ? "h-14 sm:h-20" : chaos >= 2 ? "h-10 sm:h-14" : "h-8 sm:h-10"}`}>
             {history.checks.length === 0 ? (
               <div className="flex-1 bg-zinc-800 flex items-center justify-center text-xs text-zinc-600">
                 waiting for data...
@@ -349,7 +349,7 @@ export default function Home() {
         </div>
 
         {/* Recent Checks Table */}
-        <div className="mt-12">
+        <div className="mt-8 sm:mt-12">
           <h2 className={`text-lg font-bold text-zinc-300 ${chaos >= 3 ? "animate-drift" : ""}`}>
             {chaos >= 4 ? "RECENT CHAOS" : "Recent Checks"}
           </h2>
@@ -357,7 +357,7 @@ export default function Home() {
             {[...history.checks].reverse().slice(0, 5).map((check, i) => (
               <div
                 key={i}
-                className={`flex items-center justify-between bg-zinc-900 px-4 py-2 text-sm transition-all duration-300 ${
+                className={`${i > 2 ? "hidden sm:flex" : "flex"} items-center justify-between bg-zinc-900 px-4 py-2 text-sm transition-all duration-300 ${
                   chaos >= 2 ? "rounded-2xl" : "rounded-lg"
                 } ${chaos >= 3 ? cardFloat[i % 3] : ""
                 } ${chaos >= 4 ? "animate-jitter" : ""}`}
@@ -392,7 +392,7 @@ export default function Home() {
         </div>
 
         {/* DDoS Button */}
-        <div className={`mt-16 text-center ${chaos >= 2 ? "animate-float-2" : ""}`}>
+        <div className={`mt-10 text-center sm:mt-16 ${chaos >= 2 ? "animate-float-2" : ""}`}>
           <p className={`text-xs text-zinc-700 uppercase tracking-widest mb-4 ${
             chaos >= 3 ? "animate-rainbow text-base" : ""
           }`}>
@@ -435,7 +435,7 @@ export default function Home() {
         </div>
 
         {/* Footer */}
-        <div className={`mt-16 border-t border-zinc-800 pt-8 text-center text-sm text-zinc-600 ${
+        <div className={`mt-10 border-t border-zinc-800 pt-6 text-center text-sm text-zinc-600 sm:mt-16 sm:pt-8 ${
           chaos >= 4 ? "animate-spin-slow" : chaos >= 2 ? "animate-drift" : ""
         }`}>
           <p>
