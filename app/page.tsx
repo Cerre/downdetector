@@ -124,7 +124,7 @@ export default function Home() {
   const chaosHue = chaos * 72;
   const chaosStyle = {
     filter: `hue-rotate(${chaosHue}deg)${chaos >= 4 ? " invert(1)" : ""}`,
-    transform: `skew(${chaos >= 3 ? chaos * 1.5 : 0}deg) scale(${1 + chaos * 0.02})`,
+    transform: `skew(${chaos >= 3 ? chaos * 1.2 : 0}deg)`,
   } as React.CSSProperties;
 
   // Card float classes per index
@@ -175,7 +175,7 @@ export default function Home() {
         {/* Header */}
         <div className="text-center">
           <h1 className={`font-bold text-zinc-500 uppercase tracking-widest transition-all duration-300 ${
-            chaos >= 3 ? "text-4xl" : "text-2xl"
+            chaos >= 3 ? "text-xl sm:text-3xl" : "text-2xl"
           } ${chaos >= 2 ? "animate-drift" : ""}`}>
             Is{" "}
             {hasTakenDown ? (
@@ -201,13 +201,14 @@ export default function Home() {
                   className={`font-black text-green-400 sm:text-9xl transition-all duration-300 ${
                     chaos >= 1 ? "animate-rainbow" : ""
                   } ${chaos >= 3 ? "animate-jitter" : ""
-                  } ${chaos >= 4 ? "animate-spin-slow" : ""}`}
-                  style={{ fontSize: `${Math.max(6, 8 + chaos * 2)}rem` }}
+                  } ${chaos >= 4 ? "animate-spin-slow" : ""
+                  } ${chaos >= 2 ? "animate-drift" : ""}`}
+                  style={{ fontSize: `${Math.max(4.8, 5.8 + chaos * 0.7)}rem` }}
                 >
                   NOPE
                 </div>
                 <p className={`mt-4 text-green-300 transition-all duration-300 ${
-                  chaos >= 3 ? "text-4xl font-black" : "text-2xl"
+                  chaos >= 3 ? "text-2xl sm:text-3xl font-black" : "text-xl sm:text-2xl"
                 }`}>
                   It&apos;s up. Chill.
                 </p>
@@ -221,15 +222,17 @@ export default function Home() {
                   className={`font-black text-red-500 animate-shake sm:text-9xl ${
                     chaos >= 4 ? "animate-spin-slow" : ""
                   }`}
-                  style={{ fontSize: `${Math.max(6, 8 + chaos * 2)}rem` }}
+                  style={{ fontSize: `${Math.max(4.8, 5.8 + chaos * 0.7)}rem` }}
                 >
                   YES!!!
                 </div>
                 <p className={`mt-4 text-red-400 transition-all duration-300 ${
-                  chaos >= 3 ? "text-4xl font-black animate-shake" : "text-2xl"
+                  chaos >= 3 ? "text-2xl sm:text-3xl font-black animate-shake" : "text-xl sm:text-2xl"
                 }`}>
                   {hasTakenDown ? (
-                    <>You succesfully took down ostider.se</>
+                    <span className="inline-block rounded-xl border border-red-700/70 bg-red-950/40 px-4 py-2 text-red-200 shadow-[0_0_24px_rgba(239,68,68,0.22)]">
+                      You succesfully took down ostider.se
+                    </span>
                   ) : "IT&apos;S DOWN. PANIC."}
                 </p>
                 {hasTakenDown && (
@@ -237,7 +240,7 @@ export default function Home() {
                     href={RICKROLL_URL}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="mt-6 inline-block rounded-full border border-red-500 bg-red-950 px-8 py-3 text-base font-black uppercase tracking-wide text-red-200 underline decoration-red-400 underline-offset-4 transition-all hover:scale-105 hover:bg-red-900 hover:text-white"
+                    className="mt-5 inline-block rounded-full border border-red-500 bg-red-900/70 px-7 py-2.5 text-sm font-black uppercase tracking-wide text-red-100 underline decoration-red-300 underline-offset-4 transition-all hover:scale-105 hover:bg-red-800 hover:text-white"
                   >
                     ostider.se
                   </a>
@@ -290,9 +293,7 @@ export default function Home() {
               }`}>
                 {stat.label}
               </div>
-              <div className={`mt-2 font-black leading-none transition-all duration-300 ${
-                chaos >= 3 ? "text-3xl sm:text-5xl" : "text-2xl sm:text-4xl"
-              } ${stat.color}`}>
+              <div className={`mt-2 text-2xl sm:text-4xl font-black leading-none transition-all duration-300 ${stat.color}`}>
                 {stat.value}
               </div>
             </div>
@@ -300,7 +301,7 @@ export default function Home() {
         </div>
 
         {/* Timeline Bar */}
-        <div className={`mt-8 sm:mt-12 ${chaos >= 2 ? "animate-drift" : ""}`}>
+        <div className={`mt-8 sm:mt-12 ${chaos >= 2 ? "animate-drift" : ""} ${chaos >= 3 ? "animate-jitter" : ""}`}>
           <div className="flex items-center justify-between text-sm text-zinc-500">
             <span>{chaos >= 3 ? "the past???" : "24h ago"}</span>
             <span className={`font-bold text-zinc-300 ${chaos >= 3 ? "animate-rainbow" : ""}`}>
@@ -310,7 +311,7 @@ export default function Home() {
           </div>
           <div className={`mt-2 flex gap-[1px] overflow-hidden transition-all duration-300 ${
             chaos >= 2 ? "rounded-full" : "rounded-lg"
-          } ${chaos >= 3 ? "h-14 sm:h-20" : chaos >= 2 ? "h-10 sm:h-14" : "h-8 sm:h-10"}`}>
+          } h-8 sm:h-10`}>
             {history.checks.length === 0 ? (
               <div className="flex-1 bg-zinc-800 flex items-center justify-center text-xs text-zinc-600">
                 waiting for data...
