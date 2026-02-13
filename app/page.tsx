@@ -22,20 +22,35 @@ interface UptimeHistory {
   checks: CheckEntry[];
 }
 
-const DDOS_RESPONSES = [
-  "Not nice of you.",
-  "Bro really just clicked that. \u{1F480}",
-  "The FBI has been notified. (just kidding) (or am I?)",
-  "Congrats, you did nothing.",
-  "ostider.se has been strengthened by your attempt.",
-  "Your IP has been logged. (it hasn't) (maybe)",
-  "That's illegal in 47 countries.",
-  "Attack launched! Just kidding. Touch grass.",
-  "Error 418: I'm a teapot, not a weapon.",
-  "Nice try, script kiddie.",
-  "You monster. ostider.se has feelings too.",
-  "Launching 0 packets... Done! 0% effective.",
+// Each click escalates chaos — messages get more panicked
+const CHAOS_MESSAGES: string[][] = [
+  // Level 0 → 1
+  ["vafan?", "uh oh", "hm that wasn't smart", "oh no", "wait what"],
+  // Level 1 → 2
+  ["oh shi-", "bro STOP", "things are getting weird", "varfoooor", "this is your fault"],
+  // Level 2 → 3
+  ["WALALALALALA", "MAKE IT STOP", "du har f\u00f6rst\u00f6rt allt", "AAAAAAH", "herregud"],
+  // Level 3 → 4
+  ["IT'S TOO LATE", "THERE IS NO GOING BACK", "you absolute maniac", "RIP ostider.se", "TOTAL KAOS"],
+  // Level 4 (already maxed)
+  [
+    "it's already maximum chaos you psycho",
+    "STOP CLICKING",
+    "there's nothing left to destroy",
+    "du \u00e4r sjuk",
+    "the void stares back",
+  ],
 ];
+
+const BUTTON_LABELS = [
+  "\u{1F680} LAUNCH DDOS ATTACK",
+  "\u{1F680} LAUNCH ANOTHER ONE??",
+  "\u2620\uFE0F MAKE IT WORSE",
+  "\u{1F525} FULL SEND",
+  "\u{1F480} PRESS IF YOU DARE",
+];
+
+const DDOS_SUCCESS_CLICKS = 5;
 
 const SASSY_COMMENTS = [
   "ostider.se is built different fr fr",
@@ -43,14 +58,6 @@ const SASSY_COMMENTS = [
   "ostider.se really said '99.9% uptime or die trying'",
   "more stable than my mental health",
   "ostider.se has better uptime than my sleep schedule",
-];
-
-const CHAOS_LABELS = [
-  "chill",
-  "slightly unhinged",
-  "questionable",
-  "chaotic",
-  "MAXIMUM CHAOS",
 ];
 
 function timeAgo(iso: string): string {
@@ -66,8 +73,10 @@ export default function Home() {
   const [error, setError] = useState(false);
   const [ddosMsg, setDdosMsg] = useState<string | null>(null);
   const [ddosLoading, setDdosLoading] = useState(false);
-  const [clickCount, setClickCount] = useState(0);
-  const [sassyComment, setSassyComment] = useState("");
+  const [ddosClicks, setDdosClicks] = useState(0);
+  const [sassyComment] = useState(
+    () => SASSY_COMMENTS[Math.floor(Math.random() * SASSY_COMMENTS.length)],
+  );
   const [chaos, setChaos] = useState(0);
   const ddosTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -87,25 +96,26 @@ export default function Home() {
   useEffect(() => {
     fetchData();
     const interval = setInterval(fetchData, 30000);
-    setSassyComment(SASSY_COMMENTS[Math.floor(Math.random() * SASSY_COMMENTS.length)]);
     return () => clearInterval(interval);
   }, []);
 
   const handleDdos = () => {
-    setClickCount((c) => c + 1);
+    if (ddosLoading || ddosClicks >= DDOS_SUCCESS_CLICKS) return;
+
+    setDdosClicks((c) => c + 1);
     setDdosLoading(true);
     setDdosMsg(null);
+    const nextChaos = Math.min(4, chaos + 1);
+    setChaos(nextChaos);
 
     if (ddosTimeout.current) clearTimeout(ddosTimeout.current);
 
-    const delay = 1000 + Math.random() * 2000;
+    const delay = 800 + Math.random() * 1500;
     ddosTimeout.current = setTimeout(() => {
       setDdosLoading(false);
-      if (clickCount >= 5) {
-        setDdosMsg("You've clicked this " + (clickCount + 1) + " times. Seek help.");
-      } else {
-        setDdosMsg(DDOS_RESPONSES[Math.floor(Math.random() * DDOS_RESPONSES.length)]);
-      }
+      const level = Math.min(nextChaos, 4);
+      const msgs = CHAOS_MESSAGES[level];
+      setDdosMsg(msgs[Math.floor(Math.random() * msgs.length)]);
     }, delay);
   };
 
@@ -147,7 +157,8 @@ export default function Home() {
     );
   }
 
-  const isUp = status.is_up;
+  const hasTakenDown = ddosClicks >= DDOS_SUCCESS_CLICKS;
+  const isUp = status.is_up && !hasTakenDown;
   const pct = status.uptime_percentage_24h;
 
   return (
@@ -159,38 +170,6 @@ export default function Home() {
       }`}
       style={chaosStyle}
     >
-      {/* Fixed bottom-right: Chaos stepper */}
-      <div className="fixed bottom-4 right-4 z-50 rounded-xl border border-zinc-800 bg-zinc-900/90 backdrop-blur-sm p-3 shadow-lg flex items-center gap-3">
-        <button
-          onClick={() => setChaos((c) => Math.max(0, c - 1))}
-          disabled={chaos === 0}
-          className="w-7 h-7 rounded-lg bg-zinc-800 text-zinc-400 font-bold text-sm hover:bg-zinc-700 hover:text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-        >
-          -
-        </button>
-        <div className="text-center min-w-24">
-          <div className="text-[10px] text-zinc-500 uppercase tracking-widest">
-            Chaos
-          </div>
-          <div className={`text-xs font-bold ${
-            chaos === 0 ? "text-zinc-500" :
-            chaos === 1 ? "text-yellow-400" :
-            chaos === 2 ? "text-orange-400" :
-            chaos === 3 ? "text-red-400" :
-            "text-red-500 animate-rainbow"
-          }`}>
-            {CHAOS_LABELS[chaos]}
-          </div>
-        </div>
-        <button
-          onClick={() => setChaos((c) => Math.min(4, c + 1))}
-          disabled={chaos === 4}
-          className="w-7 h-7 rounded-lg bg-zinc-800 text-zinc-400 font-bold text-sm hover:bg-zinc-700 hover:text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-        >
-          +
-        </button>
-      </div>
-
       <div className="mx-auto max-w-3xl px-6 py-12">
         {/* Header */}
         <div className="text-center">
@@ -244,7 +223,19 @@ export default function Home() {
                 <p className={`mt-4 text-red-400 transition-all duration-300 ${
                   chaos >= 3 ? "text-4xl font-black animate-shake" : "text-2xl"
                 }`}>
-                  IT&apos;S DOWN. PANIC.
+                  {hasTakenDown ? (
+                    <>
+                      You succesfully took down{" "}
+                      <a
+                        href="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="underline decoration-red-500 underline-offset-4 hover:text-red-200"
+                      >
+                        ostider.se
+                      </a>
+                    </>
+                  ) : "IT&apos;S DOWN. PANIC."}
                 </p>
                 <p className="mt-2 text-sm text-red-800 italic">
                   someone call the developers. or don&apos;t. idk.
@@ -398,29 +389,40 @@ export default function Home() {
           <p className={`text-xs text-zinc-700 uppercase tracking-widest mb-4 ${
             chaos >= 3 ? "animate-rainbow text-base" : ""
           }`}>
-            {chaos >= 4 ? "WEAPONS OF MASS DESTRUCTION" : "Totally real hacker tools"}
+            {chaos >= 4 ? "WEAPONS OF MASS DESTRUCTION" :
+             chaos >= 3 ? "this was a mistake" :
+             chaos >= 2 ? "maybe stop?" :
+             chaos >= 1 ? "hacker tools (do not click again)" :
+             "Totally real hacker tools"}
           </p>
           <button
             onClick={handleDdos}
-            disabled={ddosLoading}
-            className={`rounded-lg px-8 py-3 text-sm font-bold uppercase tracking-wider transition-all ${
+            disabled={ddosLoading || hasTakenDown}
+            className={`rounded-lg px-8 py-3 font-bold uppercase tracking-wider transition-all ${
               ddosLoading
-                ? "bg-red-900 text-red-400 cursor-wait animate-pulse"
-                : "bg-red-600 text-white hover:bg-red-500 hover:scale-105 active:scale-95"
+                ? "bg-red-900 text-red-400 cursor-wait animate-pulse text-sm"
+                : hasTakenDown
+                ? "bg-red-950 text-red-300 cursor-not-allowed text-sm"
+                : chaos >= 4
+                ? "bg-red-600 text-white hover:bg-red-500 hover:scale-110 active:scale-95 text-lg animate-jitter"
+                : chaos >= 3
+                ? "bg-red-600 text-white hover:bg-red-500 hover:scale-105 active:scale-95 text-base animate-shake"
+                : "bg-red-600 text-white hover:bg-red-500 hover:scale-105 active:scale-95 text-sm"
             }`}
           >
-            {ddosLoading ? "\u2620\uFE0F ATTACKING..." : "\u{1F680} LAUNCH DDOS ATTACK"}
+            {ddosLoading
+              ? chaos >= 3 ? "\u{1F525} DESTROYING EVERYTHING..." : "\u2620\uFE0F ATTACKING..."
+              : hasTakenDown
+              ? "TARGET ELIMINATED"
+              : BUTTON_LABELS[Math.min(chaos, 4)]}
           </button>
           {ddosMsg && (
             <p className={`mt-4 text-lg font-bold ${
-              clickCount > 5 ? "text-red-500 animate-shake" : "text-yellow-400"
+              chaos >= 3 ? "text-red-500 animate-shake text-2xl" :
+              chaos >= 2 ? "text-orange-400 text-xl" :
+              "text-yellow-400"
             }`}>
               {ddosMsg}
-            </p>
-          )}
-          {clickCount > 3 && !ddosLoading && (
-            <p className="mt-2 text-xs text-zinc-700">
-              attempts: {clickCount} | successful attacks: 0 | FBI alerts: maybe
             </p>
           )}
         </div>
