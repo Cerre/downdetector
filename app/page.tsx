@@ -249,19 +249,6 @@ export default function Home() {
             )}
           </div>
 
-          {/* Visit button */}
-          {!hasTakenDown && (
-            <a
-              href="https://ostider.se"
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`mt-6 inline-block border border-zinc-700 bg-zinc-900 px-6 py-2 text-sm font-bold text-zinc-300 transition-all hover:bg-zinc-800 hover:text-white hover:scale-105 ${
-                chaos >= 3 ? "rounded-full text-lg px-8 py-3" : "rounded-lg"
-              }`}
-            >
-              {isUp ? "Visit ostider.se (it's alive!)" : "Try visiting anyway (good luck)"}
-            </a>
-          )}
         </div>
 
         {/* Stats Grid */}
@@ -393,15 +380,6 @@ export default function Home() {
 
         {/* DDoS Button */}
         <div className={`mt-10 text-center sm:mt-16 ${chaos >= 2 ? "animate-float-2" : ""}`}>
-          <p className={`text-xs text-zinc-700 uppercase tracking-widest mb-4 ${
-            chaos >= 3 ? "animate-rainbow text-base" : ""
-          }`}>
-            {chaos >= 4 ? "WEAPONS OF MASS DESTRUCTION" :
-             chaos >= 3 ? "this was a mistake" :
-             chaos >= 2 ? "maybe stop?" :
-             chaos >= 1 ? "hacker tools (do not click again)" :
-             "Totally real hacker tools"}
-          </p>
           <button
             onClick={handleDdos}
             disabled={ddosLoading || hasTakenDown}
@@ -432,35 +410,6 @@ export default function Home() {
               {ddosMsg}
             </p>
           )}
-        </div>
-
-        {/* Footer */}
-        <div className={`mt-10 border-t border-zinc-800 pt-6 text-center text-sm text-zinc-600 sm:mt-16 sm:pt-8 ${
-          chaos >= 4 ? "animate-spin-slow" : chaos >= 2 ? "animate-drift" : ""
-        }`}>
-          <p>
-            Monitoring{" "}
-            {hasTakenDown ? (
-              <span className="text-zinc-400 font-bold">ostider.se</span>
-            ) : (
-              <a
-                href="https://ostider.se"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-zinc-400 font-bold hover:text-white transition-colors"
-              >
-                ostider.se
-              </a>
-            )}
-            {" "}every 60 seconds from a GCP VM
-          </p>
-          <p className="mt-1">
-            {chaos >= 4
-              ? "Powered by pure unfiltered chaos"
-              : chaos >= 3
-              ? "Powered by vibes and regret"
-              : "Powered by vibes, FastAPI, and questionable design choices"}
-          </p>
         </div>
       </div>
     </div>
